@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Points Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        input {
+            padding: 10px;
+            margin: 5px;
+            width: 100%;
+        }
+        button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Brand Points Calculator</h1>
+        <label for="number-of-keys">Number of Keys:</label>
+        <input type="number" id="number-of-keys" value="3">
+        <label for="key-level">Key Level:</label>
+        <input type="number" id="key-level" value="100">
+        <label for="power1">Power of Number of Keys:</label>
+        <input type="number" id="power1" value="1.7">
+        <label for="power2">Power of Key Level:</label>
+        <input type="number" id="power2" value="3">
+        <button onclick="calculate()">Calculate Brand Points</button>
+        <p>Total Brand Points: <span id="result"></span></p>
+    </div>
+
+    <script>
+        function calculate() {
+            const numberOfKeys = parseFloat(document.getElementById('number-of-keys').value);
+            const keyLevel = parseFloat(document.getElementById('key-level').value);
+            const power1 = parseFloat(document.getElementById('power1').value);
+            const power2 = parseFloat(document.getElementById('power2').value);
+            const C = 100000;
+
+            const result = Math.pow(numberOfKeys, power1) * Math.pow(keyLevel, power2) / C;
+            document.getElementById('result').textContent = result.toFixed(2);
+        }
+    </script>
+</body>
+</html>
