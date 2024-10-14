@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Key Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: black;
+            margin: 20px;
+        }
+        .calculator-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .exchange-rates {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .exchange-rates div {
+            padding: 10px;
+            background-color: #ffc107;
+            border-radius: 5px;
+            color: black;
+            font-weight: bold;
+        }
+        .exchange-rates label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .exchange-rates input {
+            width: 90px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: black;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #ffc107;
+            border: none;
+            border-radius: 5px;
+            color: black;
+            cursor: pointer;
+        }
+        .key-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+        .key-group-details {
+            flex-grow: 1;
+        }
+        .brand-point-total {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            font-size: 10px;
+            color: darkgrey;
+            margin-top: 20px;
+        }
+        .footer a {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>NFTREASURE BRAND POINT CALCULATOR</h1>
+        <div class="exchange-rates">
+            <div>
+                <label for="avaxRate">USD/AVAX:</label>
+                <input type="number" id="avaxRate" value="28.15" step="0.01">
+            </div>
+            <div>
+                <label for="smrtrRate">USD/SMRTR:</label>
+                <input type="number" id="smrtrRate" value="0.00000022" step="0.00000001">
+            </div>
+        </div>
+        <label for="numKeys">Enter number of keys:</label>
+        <input type="number" id="numKeys" placeholder="Number of Keys" />
+        <label for="keyLevel">Enter key level:</label>
+        <input type="number" id="keyLevel" placeholder="Key Level" />
+        <button onclick="addKeyGroup()">Add Key Group</button>
+        <div id="keyGroups"></div>
+        <div class="brand-point-total">
+            Total Brand Points: <span id="totalBrandPoints">0</span>
+        </div>
+    </div>
+    <div class="footer">
+        Developed By Terial<br>
+        Based on the Whitepaper Formula | 
+        <a href="https://docs.google.com/document/d/145dJX5MRO2lfSnD_PGkChhHAgfnFYgHi77IOpvVgmuQ/edit?tab=t.0#heading=h.hazylhdrdwhg">Brand Points Proposed Whitepaper</a>
+    </div>
+    <script>
+        let keyGroups = [];
+        let totalBrandPoints = 0;
+
+        const calculateBrandPoints = () => {
+            let totalKeys = 0;
+            let totalBrandPointSum = 0;
+            keyGroups.forEach(group => {
+                const keyLevelCubedSum = Math.pow(group.level, 3) * group.keys;
+                totalBrandPointSum += keyLevelCubedSum;
+                totalKeys += group.keys;
+            });
+
+            const brandPoints = ((totalBrandPointSum * Math.pow(totalKeys, 1.7)) / 100000).toFixed(2);
+            return brandPoints;
+        };
+
+        const getExactUpgradeHours = (level) => {
+            if (level === 1) return 1;
+            if (level === 2) return 2;
+            if (level === 3) return 3;
+            return level + 6;
+        };
+
+        const calculateTimeAndCost = (keyLevel) => {
+            let totalHours = 0;
+            let totalSmrtrCost = 0;
+            let totalAvaxTransactionFees = 0;
+
+            for (let i = 1; i <= keyLevel; i++) {
+                totalHours += getExactUpgradeHours(i);
+                totalSmrtrCost += 1850 * Math.pow(i, 2);
+                totalAvaxTransactionFees += 0.03140299232;
+            }
+
+            const totalDays = totalHours / 24;
+            const avaxPrice = parseFloat(document.getElementById('avaxRate').value);
+            const smrtrPrice = parseFloat(document.getElementById('smrtrRate').value);
+            const totalSmrtrCostUsd = totalSmrtrCost * smrtrPrice;
+            const totalAvaxTransactionFeesUsd = totalAvaxTransactionFees * avaxPrice;
+            const mintingCostUsd = 3 * avaxPrice;
+            const totalCost = totalSmrtrCostUsd + totalAvaxTransactionFeesUsd + mintingCostUsd;
+
+            return {
+                time: totalDays.toFixed(2),
+                cost: totalCost.toFixed(2)
+            };
+        };
+
+        const addKeyGroup = () => {
+            const numKeys = parseInt(document.getElementById('numKeys').value);
+            const keyLevel = parseInt(document.getElementById('keyLevel').value);
+
+            if (isNaN(numKeys) || isNaN(keyLevel) || numKeys <= 0 || keyLevel <= 0) {
+                return alert('Please enter valid positive numbers.');
+            }
+
+            keyGroups.push({ keys: numKeys, level: keyLevel });
+            updateUI();
+            totalBrandPoints = calculateBrandPoints();
+            document.getElementById('totalBrandPoints').innerText = totalBrandPoints;
+        };
+
+        const updateUI = () => {
+            const keyGroupsContainer = document.getElementById('keyGroups');
+            keyGroupsContainer.innerHTML = '';
+            keyGroups.forEach((group, index) => {
+                const { time, cost } = calculateTimeAndCost(group.level);
+                const groupElement = document.createElement('div');
+                groupElement.classList.add('key-group');
+                groupElement.innerHTML = `
+                    <div class="key-group-details">
+                        ${group.keys} Keys at Level ${group.level} | Time: ${time} days | Cost: $${cost} Per Key (Inc. Minting, SMRTR & Fees)
+                    </div>
+                    <button onclick="removeKeyGroup(${index})">X</button>
+                `;
+                keyGroupsContainer.appendChild(groupElement);
+            });
+        };
+
+        const removeKeyGroup = (index) => {
+            keyGroups.splice(index, 1);
+            updateUI();
+            totalBrandPoints = calculateBrandPoints();
+            document.getElementById('totalBrandPoints').innerText = totalBrandPoints;
+        };
+    </script>
+</body>
+</html>
